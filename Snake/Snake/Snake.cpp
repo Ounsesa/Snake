@@ -23,21 +23,34 @@ void Snake::Draw()
 		face = s_AsciiLookRight;
 	}
 
-	GameManagerInstance->Render(head.x, head.y, face);
+	GameManagerInstance->Render(head.x, head.y, face,3);
 	for (auto it = body.begin(); it != body.end(); it++)
 	{		
-		GameManagerInstance->Render(it->x, it->y, s_AsciiBody);
+		GameManagerInstance->Render(it->x, it->y, s_AsciiBody,3);
 	}
 }
 
 void Snake::Update()
 {
-	if (!CheckCollision())
+	if (!CheckDeadCollision())
 	{
 		ReadInput();
 		Move();
+		CheckFoodCollision();
 		Draw();
 	}
+}
+
+bool Snake::CollisionWithBody(Tile other)
+{
+	if (head == other) return true;
+
+	for (auto it = body.begin(); it != body.end(); it++)
+	{
+		if (*it == other) return true;
+	}
+
+	return false;
 }
 
 void Snake::ReadInput()
@@ -47,7 +60,7 @@ void Snake::ReadInput()
 	short uLeftKeyState = GetKeyState('A');
 	short uRightKeyState = GetKeyState('D');
 
-	Direction intentDirection = Down;
+	Direction intentDirection = DirectionZero;
 
 	if ((uDownKeyState & 0x8000) != 0)
 	{
@@ -66,7 +79,7 @@ void Snake::ReadInput()
 		intentDirection = Up;
 	}
 
-	if (!(intentDirection + lookingDirection == DirectionZero))
+	if (!(intentDirection + lookingDirection == DirectionZero) && !(intentDirection == DirectionZero))
 	{
 		lookingDirection = intentDirection;
 	}
@@ -74,17 +87,25 @@ void Snake::ReadInput()
 
 void Snake::Move()
 {
-	Tile removed = body.back();
-	body.pop_back();
-	
-	GameManagerInstance->SetWhiteSpace(removed.x, removed.y);
+	if (bodyGrowth == 0)
+	{
+		Tile removed = body.back();
+		body.pop_back();
 
-	removed = head;
-	body.push_front(removed);
+		GameManagerInstance->SetWhiteSpace(removed.x, removed.y);
+
+		removed = head;
+		body.push_front(removed);
+	}
+	else
+	{
+		bodyGrowth--;
+		body.push_front(head);
+	}
 	head += lookingDirection;
 }
 
-bool Snake::CheckCollision()
+bool Snake::CheckDeadCollision()
 {
 	if (MapInstance->IsWall(head))
 	{
@@ -101,6 +122,15 @@ bool Snake::CheckCollision()
 		}
 	}
 	return false;
+}
+
+void Snake::CheckFoodCollision()
+{
+	if (!(head == GameManagerInstance->Food)) return;
+
+	bodyGrowth += BODY_GROWTH_FOOD;
+
+	GameManagerInstance->GenerateRandomFood();
 }
 
 void Snake::CreateInitialBody(int length)

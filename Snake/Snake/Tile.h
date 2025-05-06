@@ -3,6 +3,7 @@
 
 struct Tile
 {
+	Tile() {};
 	Tile(int _x, int _y)
 	{
 		x = _x;

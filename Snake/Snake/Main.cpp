@@ -10,13 +10,11 @@
 
 int main()
 {
+	srand(time(0));
 	SetConsoleOutputCP(65001);
 
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_CURSOR_INFO cursorInfo;
-	GetConsoleCursorInfo(hConsole, &cursorInfo);
-	cursorInfo.bVisible = false;
-	SetConsoleCursorInfo(hConsole, &cursorInfo);
+	
 
 	//May cause issues with the screen resolution. If so, comment this part
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,10 +38,14 @@ int main()
 
 	while (!GameManagerInstance->gameFinished)
 	{
+		CONSOLE_CURSOR_INFO cursorInfo;
+		GetConsoleCursorInfo(hConsole, &cursorInfo);
+		cursorInfo.bVisible = false;
+		SetConsoleCursorInfo(hConsole, &cursorInfo);
 		MapInstance->Draw();
 		GameManagerInstance->Update();
 
-		Sleep(250);
+		Sleep(150);
 	}
 
 	system("cls");

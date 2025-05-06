@@ -21,14 +21,18 @@ public:
 
 	void Draw();
 	void Update();
-	void ReadInput();
-	void Move();
-	bool CheckCollision();
+	bool CollisionWithBody(Tile other);
 
 private:
+	void ReadInput();
+	void Move();
+	bool CheckDeadCollision();
+	void CheckFoodCollision();
 	std::deque<Tile> body;
 	Tile head;
 	Direction lookingDirection;
+
+	int bodyGrowth = 0;
 
 	void CreateInitialBody(int length);
 	
